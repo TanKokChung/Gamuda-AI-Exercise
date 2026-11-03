@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursive Functions</title>
+</head>
+<script>
+    let counter = 27
+
+    function reducetoZero(num) {
+        if (num === 0) {
+            console.log("It's Time")
+            return;
+        }
+        console.log("Current value is:" + num);
+        reducetoZero(num - 1);
+    }
+
+    reducetoZero(counter);
+</script>
+<body>
+    <H1>This is to test Recursive Functions</H1>
+</body>
+</html>

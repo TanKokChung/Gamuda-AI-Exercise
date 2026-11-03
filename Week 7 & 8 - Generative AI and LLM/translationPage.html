@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Translator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fcfcfc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Card Container */
+        .translator-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 850px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 35px;
+            color: #1a1a1a;
+        }
+
+        /* 2-Column Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Outlined Fieldset Style matching the screenshot */
+        fieldset {
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            padding: 6px 12px 10px 12px;
+            margin: 0 0 18px 0;
+            background-color: #fff;
+        }
+
+        fieldset:focus-within {
+            border-color: #1a73e8;
+        }
+
+        legend {
+            font-size: 11px;
+            color: #70757a;
+            padding: 0 4px;
+            font-weight: 500;
+        }
+
+        select, textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            color: #202124;
+            background: transparent;
+        }
+
+        select {
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder {
+            color: #9aa0a6;
+        }
+
+        /* Centered Translate Button */
+        .button-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .translate-btn {
+            background-color: #1967d2;
+            color: #ffffff;
+            border: none;
+            padding: 12px 50px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .translate-btn:hover {
+            background-color: #1557b0;
+        }
+
+        .translate-btn:disabled {
+            background-color: #a0c3ff;
+            cursor: not-allowed;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 650px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="translator-card">
+        <h1>Text Translator</h1>
+
+        <div class="grid-container">
+            <!-- Left Column: Input -->
+            <div class="column">
+                <fieldset>
+                    <legend>Input Language</legend>
+                    <select id="inputLanguage">
+                        <option value="English" selected>English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Japanese">Japanese</option>
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Enter text to translate</legend>
+                    <textarea id="textInput" placeholder="Type sentence here...">I like programming.</textarea>
+                </fieldset>
+            </div>
+
+            <!-- Right Column: Output -->
+            <div class="column">
+                <fieldset>
+                    <legend>Output Language</legend>
+                    <select id="outputLanguage">
+                        <option value="German" selected>German</option>
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Japanese">Japanese</option>
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Translation</legend>
+                    <textarea id="translationOutput" readonly placeholder="Translation will appear here..."></textarea>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="translate-btn" id="translateBtn" onclick="handleTranslate()">TRANSLATE</button>
+        </div>
+    </div>
+
+    <!-- JavaScript to communicate with FastAPI backend -->
+    <script>
+        async function handleTranslate() {
+            const inputLanguage = document.getElementById("inputLanguage").value;
+            const outputLanguage = document.getElementById("outputLanguage").value;
+            const textInput = document.getElementById("textInput").value.trim();
+            const translationOutput = document.getElementById("translationOutput");
+            const translateBtn = document.getElementById("translateBtn");
+
+            if (!textInput) {
+                alert("Please enter text to translate.");
+                return;
+            }
+
+            // Set loading state in UI
+            translateBtn.disabled = true;
+            translateBtn.innerText = "TRANSLATING...";
+            translationOutput.value = "Translating...";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/translate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        input_language: inputLanguage,
+                        output_language: outputLanguage,
+                        text_input: textInput
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Translation request failed.");
+                }
+
+                const data = await response.json();
+                translationOutput.value = data.translated_text;
+
+            } catch (error) {
+                console.error("Error:", error);
+                translationOutput.value = "Error: " + error.message;
+            } finally {
+                // Restore button state
+                translateBtn.disabled = false;
+                translateBtn.innerText = "TRANSLATE";
+            }
+        }
+    </script>
+</body>
+</html>

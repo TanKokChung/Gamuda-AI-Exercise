@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control flow</title>
+</head>
+<script>
+    let greet = () => "Good morning, LouisTan";
+    let message = greet();
+    console.log(message);
+
+    let addition = (num1, num2) => num1 + num2;
+    let calcResult = addition(6, 7);
+    console.log(calcResult);
+
+    let num = calcResult;
+    let checkEvenOdd = (num % 2 === 0) ?
+        () => console.log("The number is even") :
+        () => console.log("The number is odd");
+    checkEvenOdd();
+</script>
+<body>
+    <h1>This is to test control flow:functions</h1>
+</body>
+</html>
